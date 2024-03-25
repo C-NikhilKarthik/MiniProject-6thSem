@@ -1,6 +1,6 @@
 import { useNavigation } from '@react-navigation/native';
 import React from 'react'
-import { StyleSheet,Button, ImageBackground, View, Text, StatusBar } from 'react-native'
+import { StyleSheet, Button, ImageBackground, View, Text, StatusBar } from 'react-native'
 
 const PatternBg = { uri: 'https://e1.pxfuel.com/desktop-wallpaper/759/194/desktop-wallpaper-subtle-pride-phone-background-made-by-me-r-lgbt-thumbnail.jpg' }
 
@@ -17,7 +17,7 @@ function LandingPage() {
         <Button
           color="rgb(101 163 13)"
           title="Continue"
-          onPress={()=>{
+          onPress={() => {
             navigation.navigate('homePage')
           }}
         />

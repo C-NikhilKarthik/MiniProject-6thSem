@@ -12,9 +12,9 @@ export default function App() {
   return (
     <NavigationContainer>
       <Stack.Navigator>
-        <Stack.Screen name='landingPage' component={LandingPage} options={{title: 'Welcome'}}/>
-        <Stack.Screen name='homePage' component={HomePage} options={{title: 'Home'}}/>
-        <Stack.Screen name='cameraPage' component={CameraPage} options={{title: 'Camera'}}/>
+        <Stack.Screen name='landingPage' component={LandingPage} options={{ headerShown: false }} />
+        <Stack.Screen name='homePage' component={HomePage} options={{ headerShown: false }} />
+        <Stack.Screen name='cameraPage' component={CameraPage} options={{ headerShown: false }} />
       </Stack.Navigator>
     </NavigationContainer>
   );
