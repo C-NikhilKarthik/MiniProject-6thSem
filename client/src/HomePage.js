@@ -4,6 +4,7 @@ import EvilIcons from '@expo/vector-icons/EvilIcons';
 import Button1 from './components/Button';
 import { useNavigation } from '@react-navigation/native';
 import axios from 'axios';
+import * as ImagePicker from 'expo-image-picker'; // Import ImagePicker module
 
 const PatternBg = { uri: 'https://e1.pxfuel.com/desktop-wallpaper/759/194/desktop-wallpaper-subtle-pride-phone-background-made-by-me-r-lgbt-thumbnail.jpg' };
 
@@ -18,6 +19,34 @@ function HomePage({ route }) {
         if (newIndex < 0) newIndex = len;
         if (newIndex > len) newIndex = 0;
         setDynamicIndex(newIndex);
+    };
+
+    const pickImage = async () => {
+        try {
+            const result = await ImagePicker.launchImageLibraryAsync({
+                mediaTypes: ImagePicker.MediaTypeOptions.Images,
+                quality: 1,
+            });
+
+            console.log(result.assets[0]?.uri)
+
+            if (!result.cancelled) {
+                const formData = new FormData();
+                formData.append('image', {
+                    uri: result.assets[0]?.uri,
+                    type: 'image/jpeg',
+                    name: 'photo.jpg'
+                });
+
+                const response = await axios.post('http://10.0.3.61:5000/predict', formData);
+                const responseData = response.data;
+
+                setImages([...images, { uri: result.assets[0]?.uri, label: responseData.predicted_labels }]);
+                setDynamicIndex(images.length);
+            }
+        } catch (error) {
+            console.error('Error:', error);
+        }
     };
 
     const setAttendance = async () => {
@@ -76,6 +105,12 @@ function HomePage({ route }) {
                             navigation.navigate('cameraPage');
                         }}
                     />
+                </View>
+
+                <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center', marginBottom: 10 }}>
+                    <TouchableOpacity onPress={pickImage}>
+                        <EvilIcons name="image" size={30} color="green" />
+                    </TouchableOpacity>
                 </View>
 
                 <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center', marginBottom: 10 }}>
