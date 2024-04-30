@@ -1,11 +1,11 @@
 import requests
 
 # API endpoint
-url = 'http://10.0.3.61:5000/predict'
+url = 'http://10.0.3.8:5000/predict'
 
 # Path to the image file
-# image_path = r"C:\Users\Karthik Avinash\OneDrive\Desktop\6th Sem\Mini-project\GIT_DRIVE\12_Students_Dataset\dataset_faces\21bcs052\face_34-1.png"
-image_path = r"C:\Users\Karthik\Downloads\face_101-1.png"
+image_path = r"C:\Users\Karthik Avinash\OneDrive\Desktop\6th Sem\Mini-project\GIT_DRIVE\12_Students_Dataset\dataset_faces\21bcs052\face_34-1.png"
+
 # Read the image file
 with open(image_path, 'rb') as file:
     # Prepare the POST request with the image file
