@@ -1,17 +1,16 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { Button, Image, ImageBackground, TouchableOpacity, Text, View } from 'react-native';
-import EvilIcons from '@expo/vector-icons/EvilIcons';
-import Button1 from './components/Button';
-import { useNavigation } from '@react-navigation/native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, Image, ImageBackground, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import * as ImagePicker from 'expo-image-picker';
 import axios from 'axios';
-import * as ImagePicker from 'expo-image-picker'; // Import ImagePicker module
+import EvilIcons from '@expo/vector-icons/EvilIcons';
+import { MaterialIcons, Ionicons, FontAwesome, Feather } from '@expo/vector-icons';
+
 
 const PatternBg = { uri: 'https://e1.pxfuel.com/desktop-wallpaper/759/194/desktop-wallpaper-subtle-pride-phone-background-made-by-me-r-lgbt-thumbnail.jpg' };
 
-function HomePage({ route }) {
-    const navigation = useNavigation();
+function HomePage() {
     const [images, setImages] = useState([]);
-    const [dynamicIndex, setDynamicIndex] = useState(-1);
+    const [dynamicIndex, setDynamicIndex] = useState(0);
 
     const reorderImage = (flag) => {
         const len = images.length - 1;
@@ -21,6 +20,16 @@ function HomePage({ route }) {
         setDynamicIndex(newIndex);
     };
 
+
+    useEffect(() => {
+        (async () => {
+            const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+            if (status !== 'granted') {
+                alert('Sorry, we need camera roll permissions to make this work!');
+            }
+        })();
+    }, []);
+
     const pickImage = async () => {
         try {
             const result = await ImagePicker.launchImageLibraryAsync({
@@ -28,164 +37,127 @@ function HomePage({ route }) {
                 quality: 1,
             });
 
-            console.log(result.assets[0]?.uri)
-
             if (!result.cancelled) {
-                const formData = new FormData();
-                formData.append('image', {
-                    uri: result.assets[0]?.uri,
-                    type: 'image/jpeg',
-                    name: 'photo.jpg'
-                });
-
-                const response = await axios.post('http://10.0.3.61:5000/predict', formData);
-                const responseData = response.data;
-
-                setImages([...images, { uri: result.assets[0]?.uri, label: responseData.predicted_labels }]);
-                setDynamicIndex(images.length);
+                setImages([...images, result?.assets[0]?.uri]);
+                uploadImage(result?.assets[0]?.uri)
             }
         } catch (error) {
-            console.error('Error:', error);
+            console.error('Error picking image:', error);
         }
     };
 
-    const setAttendance = async () => {
-        var list = []
-        images.map((image) => {
-            image.label.filter(label => label !== 'UNKNOWN').map((label) => {
-                list.push(label)
-            })
-        })
-
-        console.log(list)
-
+    const captureImage = async () => {
         try {
-            const url = 'http://10.0.3.61:5000/store';
+            const result = await ImagePicker.launchCameraAsync({
+                mediaTypes: ImagePicker.MediaTypeOptions.Images,
+                quality: 1,
+            });
 
-            // Create an object with the 'data' key and the list of data
-            const requestData = { data: list };
+            if (!result.cancelled) {
+                setImages([...images, result?.assets[0]?.uri]);
+                uploadImage(result?.assets[0]?.uri)
+            }
+        } catch (error) {
+            console.error('Error capturing image:', error);
+        }
+    };
 
-            // Send POST request to the backend
-            const response = await axios.post(url, requestData);
 
-            // Log the response from the backend
+    const uploadImage = async (image) => {
+        try {
+            const formData = new FormData();
+            formData.append('image', {
+                uri: image,
+                type: 'image/jpeg',
+                name: 'photo.png'
+            });
+
+            const response = await axios.post('http://10.0.3.61:5000/predict', formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+                }
+            });
             console.log(response.data);
         } catch (error) {
-            // Handle errors
-            console.error('Error:', error);
-        }
-    }
-
-    const deleteImage = () => {
-        const updatedImages = [...images];
-        updatedImages.splice(dynamicIndex, 1);
-        setImages(updatedImages);
-
-        if (dynamicIndex >= updatedImages.length && dynamicIndex > 0) {
-            setDynamicIndex(dynamicIndex - 1);
+            console.error('Error uploading image:', error);
         }
     };
 
-    useEffect(() => {
-        if (route.params) {
-            const { data, prediction } = route.params;
-            setImages([...images, { uri: data, label: prediction.predicted_labels }]);
-            setDynamicIndex(images.length);
+    const storePredictions = async () => {
+        try {
+            const response = await axios.get('http://10.0.3.61:5000/save_predictions');
+            console.log(response.data);
+        } catch (error) {
+            console.error('Error storing predictions:', error);
         }
-    }, [route.params]);
+    };
 
     return (
         <ImageBackground source={PatternBg} resizeMode='cover' style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
             <View style={{ width: '100%', alignItems: 'center' }}>
-                <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center', marginBottom: 10 }}>
-                    <Button1
-                        title={'Add an Image'}
-                        icon='camera'
-                        onPress={() => {
-                            navigation.navigate('cameraPage');
-                        }}
-                    />
-                </View>
-
-                <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center', marginBottom: 10 }}>
-                    <TouchableOpacity onPress={pickImage}>
-                        <EvilIcons name="image" size={30} color="green" />
-                    </TouchableOpacity>
-                </View>
-
-                <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center', marginBottom: 10 }}>
-                    {images.length !== 0 && (
-                        <EvilIcons
-                            name='eye'
-                            color='green'
-                            style={{ fontSize: 20, marginRight: 5 }}
-                        />
-                    )}
-                    <Text style={{ color: 'white' }}>No. of Images: {images.length}</Text>
-                </View>
-
-                <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center', marginBottom: 10 }}>
-                    {images.length !== 0 && (
-                        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                            <EvilIcons
-                                name='chevron-left'
-                                color='#38a169'
-                                size={55}
-                                onPress={() => reorderImage(-1)}
-                            />
-                            <View style={{ position: 'relative', borderStyle: 'dashed', borderWidth: 2, borderColor: '#38a169', borderRadius: 8 }}>
-                                <Button
-                                    onPress={deleteImage}
-                                    title="Remove"
-                                    color="red"
-                                    style={{ position: 'absolute', top: 0, right: 0, zIndex: 10 }}
+                <View style={{ flexDirection: 'column', justifyContent: 'center', alignItems: 'center', marginBottom: 10 }}>
+                    <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center', marginBottom: 10 }}>
+                        {images.length !== 0 && (
+                            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                                <EvilIcons
+                                    name='chevron-left'
+                                    color='#38a169'
+                                    size={55}
+                                    onPress={() => reorderImage(-1)}
                                 />
-                                <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }}>
-                                    {images.length !== 0 && <Image source={{ uri: images[dynamicIndex].uri }} style={{ width: 240, height: 240 }} />}
+                                <View style={{ position: 'relative', borderStyle: 'dashed', borderWidth: 2, borderColor: '#38a169', borderRadius: 8 }}>
+                                    <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }}>
+                                        {images.length !== 0 && <Image source={{ uri: images[dynamicIndex] }} style={{ width: 240, height: 240 }} />}
+                                    </View>
                                 </View>
+
+                                <EvilIcons
+                                    name='chevron-right'
+                                    color='#38a169'
+                                    size={55}
+                                    onPress={() => reorderImage(1)}
+                                />
                             </View>
+                        )}
+                    </View>
+                    <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center', marginBottom: 10 }}>
+                        <TouchableOpacity onPress={captureImage} style={{ flexDirection: 'row', alignItems: 'center' }}>
+                            <EvilIcons name="camera" size={50} color="green" />
+                            <Text style={{ marginLeft: 10, color: 'white', fontSize: 20 }}>Camera</Text>
+                        </TouchableOpacity>
+                    </View>
 
-                            <EvilIcons
-                                name='chevron-right'
-                                color='#38a169'
-                                size={55}
-                                onPress={() => reorderImage(1)}
-                            />
-                        </View>
-                    )}
-                </View>
+                    <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center', marginBottom: 10 }}>
+                        <TouchableOpacity onPress={pickImage} style={{ flexDirection: 'row', alignItems: 'center' }}>
+                            <EvilIcons name="image" size={50} color="green" />
+                            <Text style={{ marginLeft: 10, color: 'white', fontSize: 20 }}>Gallery</Text>
+                        </TouchableOpacity>
+                    </View>
 
-                <View style={{ marginBottom: 10 }}>
-                    {images.length !== 0 && (
-                        <View style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                            <Text style={{ color: 'gray', fontSize: 16 }}>
-                                No. of Students:
-                            </Text>
-                            {images[dynamicIndex].label
-                                .filter(label => label !== 'UNKNOWN')
-                                .map((label, index) => (
-                                    <Text key={index} style={{ color: '#38a169', fontSize: 16 }}>
-                                        {label}
-                                    </Text>
-                                ))}
-                        </View>
-                    )}
-                </View>
-
-
-                <View style={{ marginBottom: 10 }}>
-                    <Button
-                        title='Mark Attendance'
-                        onPress={() => {
-                            setAttendance()
-                            // Implement your logic for marking attendance here
-                            console.log('Marking attendance...');
-                        }}
-                    />
+                    <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center', marginBottom: 10 }}>
+                        <TouchableOpacity onPress={storePredictions} style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: '#38a169', padding: 10, borderRadius: 8 }}>
+                            <Text style={{ color: 'white', fontSize: 20 }}>Store Predictions</Text>
+                        </TouchableOpacity>
+                    </View>
+                    {/* <Button title="Upload Images" onPress={uploadImage} /> */}
                 </View>
             </View>
         </ImageBackground>
     );
 }
+
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    image: {
+        width: 300,
+        height: 300,
+        resizeMode: 'cover',
+        marginBottom: 20,
+    },
+});
 
 export default HomePage;
