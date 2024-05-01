@@ -19,7 +19,7 @@ from email.mime.base import MIMEBase
 from email import encoders
 import datetime
 
-from pass_word import password
+from mailpass import password
 
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}})  # Enable CORS for all origins
