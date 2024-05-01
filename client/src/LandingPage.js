@@ -18,7 +18,7 @@ function LandingPage() {
           color="rgb(101 163 13)"
           title="Continue"
           onPress={() => {
-            navigation.navigate('homePage')
+            navigation.navigate('loginPage')
           }}
         />
         <StatusBar style="auto" />
