@@ -83,14 +83,15 @@ function HomePage() {
         }
     };
 
-    const storePredictions = async () => {
+
+    const getResults = async () => {
         try {
-            const response = await axios.get('http://10.0.3.61:5000/save_predictions');
+            const response = await axios.post('http://10.0.3.61:5000/save');
             console.log(response.data);
         } catch (error) {
             console.error('Error storing predictions:', error);
         }
-    };
+    }
 
     return (
         <ImageBackground source={PatternBg} resizeMode='cover' style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
@@ -134,12 +135,15 @@ function HomePage() {
                         </TouchableOpacity>
                     </View>
 
-                    <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center', marginBottom: 10 }}>
+                    {/* <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center', marginBottom: 10 }}>
                         <TouchableOpacity onPress={storePredictions} style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: '#38a169', padding: 10, borderRadius: 8 }}>
                             <Text style={{ color: 'white', fontSize: 20 }}>Store Predictions</Text>
                         </TouchableOpacity>
-                    </View>
+                    </View> */}
                     {/* <Button title="Upload Images" onPress={uploadImage} /> */}
+                    <TouchableOpacity onPress={getResults} style={styles.resultsButton}>
+                        <Text style={{ color: 'white', fontSize: 20 }}>Get Results</Text>
+                    </TouchableOpacity>
                 </View>
             </View>
         </ImageBackground>
@@ -157,6 +161,11 @@ const styles = StyleSheet.create({
         height: 300,
         resizeMode: 'cover',
         marginBottom: 20,
+    },
+    resultsButton: {
+        backgroundColor: '#38a169',
+        padding: 10,
+        borderRadius: 8,
     },
 });
 

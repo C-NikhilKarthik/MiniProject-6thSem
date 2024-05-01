@@ -8,16 +8,23 @@ import cv2
 import numpy as np
 import joblib
 from flask_cors import CORS
-import pandas as pd
+from ultralytics import YOLO
 import jwt
 import psycopg2
 from flask_bcrypt import Bcrypt
+import smtplib
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+from email.mime.base import MIMEBase
+from email import encoders
+import datetime
+
+from pass_word import password
 
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}})  # Enable CORS for all origins
 bcrypt = Bcrypt(app)
 
-# Global constants
 global Email
 global conn
 app.config["SECRET_KEY"] = "jshefhbkj5456789654vgbdjgf"
@@ -40,8 +47,109 @@ def connectDB():
     );''')
     conn.commit()
     cur.close()
-# Load models
-face_detector = cv2.CascadeClassifier('haarcascade_frontalface_default.xml')
+
+import cv2
+from docx import Document
+from docx.shared import Inches
+import smtplib
+from email.message import EmailMessage
+
+from docx.shared import Cm
+from PIL import Image
+
+
+# Define a global variable to store predictions and face images
+accumulated_predictions = []
+accumulated_face_images = []
+
+
+def send_email_with_attachment(file_path):
+    global Email
+    print("Sending email!!")
+    # Email credentials
+    sender_email = Email
+    receiver_email = Email
+    # receiver_email = "vivekraj@iiitdwd.ac.in"
+    
+    # Create a multipart message
+    message = MIMEMultipart()
+    message["From"] = sender_email
+    message["To"] = receiver_email
+    message["Subject"] = "Live Class Predictions Report"
+
+    # Add body to email
+    body = "Please find the attached Live Class Predictions Report."
+    message.attach(MIMEText(body, "plain"))
+
+    # Open the file in binary mode
+    with open(file_path, "rb") as attachment:
+        # Add file as application/octet-stream
+        part = MIMEBase("application", "octet-stream")
+        part.set_payload(attachment.read())
+
+    # Encode file in ASCII characters to send by email    
+    encoders.encode_base64(part)
+
+    # Add header as key/value pair to attachment part
+    part.add_header(
+        "Content-Disposition",
+        f"attachment; filename= {file_path}",
+    )
+
+    # Add attachment to message and convert message to string
+    message.attach(part)
+    text = message.as_string()
+
+    # Log in to the email server
+    server = smtplib.SMTP("smtp.gmail.com", 587)
+    server.starttls()
+    server.login(sender_email, password)
+
+    # Send email
+    server.sendmail(sender_email, receiver_email, text)
+    server.quit()
+
+
+def create_word_document(predictions, face_images):
+    now = datetime.datetime.now()
+    timestamp = now.strftime("%Y-%m-%d_%H-%M-%S")
+    file_name = f"live_class_predictions_{timestamp}.docx"
+
+    document = Document()
+    
+    # Add heading
+    document.add_heading('Live Class Predictions', level=1)
+    
+    # Add table
+    table = document.add_table(rows=1, cols=2)
+    hdr_cells = table.rows[0].cells
+    hdr_cells[0].text = 'Face Image'
+    hdr_cells[1].text = 'Predictions'
+    
+    # Add data to table
+    for i, (prediction, face_image) in enumerate(zip(predictions, face_images)):
+        # Add a new row
+        row = table.add_row().cells
+
+        # Add the face image to the first column
+        img_path = f'face_image_{i}.png'
+        cv2.imwrite(img_path, face_image)
+        img = Image.open(img_path)
+        width, height = img.size
+        aspect_ratio = width / height
+        img_width = Cm(2)  # Set width to 2 cm
+        img_height = img_width / aspect_ratio
+        row[0].paragraphs[0].add_run().add_picture(img_path, width=img_width, height=img_height)
+
+        # Add predictions to the second column
+        row[1].text = prediction
+
+    # Save the document
+    document.save(file_name)
+    send_email_with_attachment(file_name)
+
+
+    
 
 
 with open("reversed_obj_ids.json", "r") as file:
@@ -173,6 +281,7 @@ def get_models_prediction(models, model_thr, embedding,label_encoder,debug=0):
     return [knn_pred,rf_pred,lr_pred,svm_l_pred,svm_rbf_pred,svm_ploy_pred,svm_sig_pred,ann1_pred,ann2_pred,cnn1_pred,cnn2_pred]
 
 def get_predictions(image_copy, models, model_thr, label_encoder, tflite_model):
+    # print(image_copy)
     image = cv2.resize(image_copy,(160,160))
 
     embedding = get_tflite_facenet_embedding(image=image, tflite_model=tflite_model)
@@ -222,30 +331,79 @@ tflite_model = load_tflite_model()
 label_encoder = "models-pkl/le.pkl"
 label_encoder = joblib.load(label_encoder)
 
-def detect_faces(image):
-    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-    faces = face_detector.detectMultiScale(gray, 1.1, 4)
-    print(">>>",faces[0])
-    return faces
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+def get_yolo_faces(image):
+    model = YOLO('yolov8n-face.pt')
+    # print("Yolov8 model loaded successfully")
+    # print("image loaded")
+
+    if image is not None:
+        # print("here")
+        # image = cv2.resize(image, (640, 640))
+
+        # print("image resized")
+        faces=[]
+        results = model(image)
+        # print("here1")
+        for result in results:
+            # print("show ")
+
+            for box in result.boxes.xywh:
+                        box = box.cpu().numpy().tolist()
+                        box = np.around(box, decimals=4).tolist()
+                        x,y,w,h=int(box[0]),int(box[1]),int(box[2]),int(box[3])
+                        # face_image = image[y:y + h, x:x + w]
+                        # face_image = cv2.resize(face_image, (200, 200))
+                        # # predictions=model2(face_image)
+                        # # print(predictions)
+                        # cv2.imshow("Processed Face", face_image)
+                        # cv2.waitKey(0)
+                        faces.append([x,y,w,h])
+
+        return faces
+    else:
+        print(f"Error: Unable to load image '{image}'.")
+        return None
+
+
 
 def get_preds(face_images):
     embeddings = []
     predictions = []
     for i, face_image in enumerate(face_images):
-        # cv2.imshow("kar", face_image)
+        # cv2.imshow("get_preds", face_image)
         # cv2.waitKey(0)
         preds = get_predictions(image_copy=face_image,label_encoder=label_encoder,model_thr=model_thr,models=models, tflite_model=tflite_model)
-        print("Predictions: ", preds)
-        
-        predictions.append(preds)
-    print("Predictions: ", predictions)
+        # print("Predictions: ", preds)
+        prediction_str = f"C-KNN: {preds[0]}\nRF: {preds[1]}\nLR: {preds[2]}\nSVM-L: {preds[3]}\nSVM-R: {preds[4]}\nSVM-P: {preds[5]}\nSVM-S: {preds[6]}\nANN-1: {preds[7]}\nANN-2: {preds[8]}\nCNN-1: {preds[9]}\nCNN-2: {preds[10]}"
+        predictions.append(prediction_str)
+        # predictions.append("Face-"+str(i)+": "+', '.join(preds))
+    # print("Predictions: ", predictions)
     return predictions
 
 def predict(image):
     # Predict labels for the image
-    faces = detect_faces(image)
-    face_images = [image[y:y+h, x:x+w] for (x, y, w, h) in faces]
+    # faces = detect_faces(image)
+    faces = get_yolo_faces(image=image)
+    face_images = [image[y-h//2:y+h//2, x-w//2:x+w//2] for (x, y, w, h) in faces]
     predicted_labels = get_preds(face_images)
+    accumulated_predictions.extend(predicted_labels)
+    accumulated_face_images.extend(face_images)
+    # create_word_document(predictions=predicted_labels,face_images=face_images)
     return predicted_labels
 
 @app.route('/api', methods=['GET'])
@@ -262,8 +420,6 @@ def hello():
     d = {}
     d['pred'] = "test"
     return jsonify(d)
-
-predictions = []
 
 @app.route('/register', methods=["POST"])
 def registration():
@@ -333,7 +489,6 @@ def login():
 
 @app.route('/predict', methods=['POST'])
 def predict_endpoint():
-    global predictions
     try:
         # Check if image file is present in the request
         if 'image' not in request.files:
@@ -347,56 +502,25 @@ def predict_endpoint():
 
         # Predict labels for the image
         prediction = predict(image)
-        for i in prediction:
-            predictions.append(i)
+
         return jsonify({'predicted_labels': prediction}), 200
     
     except Exception as e:
         print(e)
         return jsonify({'error': str(e)}), 500
-    
-@app.route('/save_predictions', methods=['GET'])
-def save_predictions():
-    global predictions
-    try:
-        # Convert predictions to a JSON string
-        json_string = json.dumps(predictions)
-        
-        # Write JSON string to a text file
-        with open('predicted_labels.txt', 'w') as f:
-            f.write(json_string)
-        
-        # Load existing Excel sheet if available
-        try:
-            df = pd.read_excel('predicted_labels.xlsx')
-        except FileNotFoundError:
-            df = pd.DataFrame(columns=['predicted_labels'])
-        
-        # Check if the pattern exists in the Excel sheet
-        for item in predictions:
-            # Filter out "UNKNOWN" values and calculate the mode of the remaining elements in the sublist
-            filtered_item = [ele for ele in item if ele != "UNKNOWN"]
-            if not filtered_item:
-                continue  # Skip if all elements are "UNKNOWN"
-            mode_value = max(set(filtered_item), key=filtered_item.count)
-            
-            # Check if item[2] matches the mode and is not already in the Excel sheet
-            if item[2] == mode_value and item[2] not in df['predicted_labels'].values:
-                # Add the pattern to the DataFrame
-                new_row = pd.DataFrame({"predicted_labels": [item[2]]})
-                df = pd.concat([df, new_row], ignore_index=True)
-                print(f"Added pattern {item[2]} to the DataFrame.")
-            else:
-                print(f"Pattern {item[2]} either does not match the mode, contains only 'UNKNOWN' values, or already exists in the DataFrame.")
-        
-        # Save the updated Excel sheet
-        df.to_excel('predicted_labels.xlsx', index=False)
-        
-        return jsonify({"message": "Predicted labels processed and Excel sheet updated"}), 200
-    
-    except Exception as e:
-        print(e)
-        return jsonify({'error': str(e)}), 500
 
+@app.route('/save', methods=['POST'])
+def save_predictions():
+    global accumulated_predictions
+    global accumulated_face_images
+    
+    # Create and save the Word document with accumulated predictions and face images
+    create_word_document(predictions=accumulated_predictions, face_images=accumulated_face_images)
+    
+    # Clear the accumulated data for the next batch of predictions
+    accumulated_predictions = []
+    accumulated_face_images = []
+    
+    return jsonify({'message': 'Predictions saved successfully'}), 200
 if __name__ == '__main__':
     app.run(host='0.0.0.0', debug=True, use_reloader = True)
