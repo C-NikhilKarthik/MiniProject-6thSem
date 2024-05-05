@@ -67,7 +67,7 @@ def send_email_with_attachment(file_path):
     global Email
     print("Sending email!!")
     # Email credentials
-    sender_email = Email
+    sender_email = '21bcs024@iiitdwd.ac.in'
     receiver_email = Email
     # receiver_email = "vivekraj@iiitdwd.ac.in"
     

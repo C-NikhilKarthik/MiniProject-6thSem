@@ -11,6 +11,7 @@ const PatternBg = { uri: 'https://e1.pxfuel.com/desktop-wallpaper/759/194/deskto
 function HomePage() {
     const [images, setImages] = useState([]);
     const [dynamicIndex, setDynamicIndex] = useState(0);
+    const [state, setState] = useState(true);
 
     const reorderImage = (flag) => {
         const len = images.length - 1;
@@ -85,9 +86,13 @@ function HomePage() {
 
 
     const getResults = async () => {
+        setState(false)
         try {
             const response = await axios.post('http://10.0.3.61:5000/save');
             console.log(response.data);
+            if (response.data) {
+                setState(true)
+            }
         } catch (error) {
             console.error('Error storing predictions:', error);
         }
@@ -134,14 +139,11 @@ function HomePage() {
                             <Text style={{ marginLeft: 10, color: 'white', fontSize: 20 }}>Gallery</Text>
                         </TouchableOpacity>
                     </View>
-
-                    {/* <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center', marginBottom: 10 }}>
-                        <TouchableOpacity onPress={storePredictions} style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: '#38a169', padding: 10, borderRadius: 8 }}>
-                            <Text style={{ color: 'white', fontSize: 20 }}>Store Predictions</Text>
-                        </TouchableOpacity>
-                    </View> */}
-                    {/* <Button title="Upload Images" onPress={uploadImage} /> */}
-                    <TouchableOpacity onPress={getResults} style={styles.resultsButton}>
+                    <TouchableOpacity
+                        onPress={getResults}
+                        style={[styles.resultsButton, disabled && styles.disabledButton]}
+                        disabled={state}
+                    >
                         <Text style={{ color: 'white', fontSize: 20 }}>Get Results</Text>
                     </TouchableOpacity>
                 </View>
@@ -166,6 +168,9 @@ const styles = StyleSheet.create({
         backgroundColor: '#38a169',
         padding: 10,
         borderRadius: 8,
+    },
+    disabledButton: {
+        opacity: 0.5,
     },
 });
 
