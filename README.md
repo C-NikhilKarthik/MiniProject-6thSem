@@ -15,6 +15,51 @@ The system features:
 - Automated excel sheet population
 - Detailed attendance analysis using graphs
 
+## Model Flow Diagram
+
+The model flow diagram illustrates the sequence of operations and data flow within our attendance system.
+
+<a href="https://drive.google.com/file/d/1ffkNiLgm12zF-xVrFtJgvT-rhiZbgYdY/view?usp=sharing">
+  <img src="https://drive.google.com/uc?id=1ffkNiLgm12zF-xVrFtJgvT-rhiZbgYdY" alt="Explanation Diagram">
+</a>
+
+
+<!-- [![Model Flow Diagram](https://drive.google.com/uc?id=1RN6-9Hih7yGffmvR674B81U9G25qP6lx)](https://drive.google.com/file/d/1RN6-9Hih7yGffmvR674B81U9G25qP6lx/view?usp=sharing)
+ -->
+The diagram showcases the following key components and their interactions:
+
+- **Face Detection:** Initial step involves detecting faces in the input images captured by the mobile app.
+- **Face Recognition:** Identified faces are then recognized using deep learning models trained on student data.
+- **Data Processing:** Extracted facial features are processed to determine attendance records and populate the excel sheet.
+- **Attendance Analysis:** The attendance data is further analyzed to generate detailed graphs and reports for faculty review.
+
+
+## Images
+
+<div style="text-align: center;">
+  <div style="display: inline-block; margin-right: 20px;">
+    <a href="https://drive.google.com/file/d/1B7YETwAIyyKojhXaIdJdYzTpe07P-X_j/view?usp=sharing">
+      <img src="https://drive.google.com/uc?id=1B7YETwAIyyKojhXaIdJdYzTpe07P-X_j" alt="Landing Page" height="600">
+      <p>Landing Page</p>
+    </a>
+  </div>
+
+  <div style="display: inline-block; margin-right: 20px;">
+    <a href="https://drive.google.com/file/d/1yCZlkKx6-C2C6UdtTxdnZH8Ae1_on3St/view?usp=sharing">
+      <img src="https://drive.google.com/uc?id=1yCZlkKx6-C2C6UdtTxdnZH8Ae1_on3St" alt="Login Page" height="600">
+      <p>Login Page</p>
+    </a>
+  </div>
+
+  <div style="display: inline-block;">
+    <a href="https://drive.google.com/file/d/1LLfLKx9DehtzyC2nRNfsR4hxtJL64Jft/view?usp=sharing">
+      <img src="https://drive.google.com/uc?id=1LLfLKx9DehtzyC2nRNfsR4hxtJL64Jft" alt="Home Page" height="600">
+      <p>Home Page</p>
+    </a>
+  </div>
+</div>
+
+
 ## Challenges
 
 1. Varying image quality based on faculty's mobile devices
@@ -28,31 +73,19 @@ Intended for schools and colleges, our system streamlines attendance tracking. A
 
 ## Technology Stack
 
-- React-Native / Flutter
+- Expo
 - Google Sheets API
 - Tensorflow
 - Keras
 - OpenCV
 
-## Project Timeline (Gantt Chart)
-
-![Gantt Chart](link-to-image)
-
-- **Introduction:** Overview of the project timeline.
-- **Overview of Tasks:** Key tasks from research to application development.
-- **Representation of Weeks:** Timeline and task structure.
-- **Tasks Spanning Multiple Weeks:** Factors influencing extended durations.
-- **Task Details:** Task names, dates, responsible team members, and status.
-- **Adjustments and Updates:** Flexibility to accommodate changes.
-- **Visual Aid in Understanding:** Importance in project management.
-- **Conclusion:** Significance of the Gantt chart in effective planning.
-
 ## Team Members
 
-- Anand Kumar Singh (21BCS009)
-- Avaneesh Sundararajan (21BCS020)
-- C Nikhil Karthik (21BCS024)
-- Karthik Avinash (21BCS052)
+-  [Anand Kumar Singh](https://github.com/Anand930singh) (21BCS009)
+-  [Avaneesh Sundararajan](https://github.com/Avaneesh-S) (21BCS020)
+-  [C Nikhil Karthik](https://github.com/C-NikhilKarthik) (21BCS024)
+-  [Karthik Avinash](https://github.com/KarthikAvinash) (21BCS052)
+
 
 ## Appendix: Installation Guideline for App
 Following are the steps to install and run the app locally on your PC using Expo.
@@ -79,6 +112,19 @@ Following are the steps to install and run the app locally on your PC using Expo
      ```
      conda activate myenv
      ```
+
+3. **Enable "Allow Less Secure Apps" in Gmail:**
+   - Open your Gmail account settings.
+   - Go to the "Security" tab.
+   - Under "Signing in to Google", enable the option "Allow less secure apps".
+
+4. **Set Up Gmail Account Password:**
+   - Create a file named `mailpass.py` in the `server` folder.
+   - Inside `mailpass.py`, store your Gmail account password as follows:
+     ```python
+     password = "YOUR_EMAIL_PASSWORD"
+     ```
+
 5. **Install Dependencies for Expo (Client):**
    - Navigate to the root directory of the cloned repository.
    - Run the following command to install the required npm packages:
