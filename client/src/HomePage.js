@@ -11,7 +11,7 @@ const PatternBg = { uri: 'https://e1.pxfuel.com/desktop-wallpaper/759/194/deskto
 function HomePage() {
     const [images, setImages] = useState([]);
     const [dynamicIndex, setDynamicIndex] = useState(0);
-    const [state, setState] = useState(true);
+    const [state, setState] = useState(images.length === 0);
 
     const reorderImage = (flag) => {
         const len = images.length - 1;
@@ -65,6 +65,7 @@ function HomePage() {
 
 
     const uploadImage = async (image) => {
+        setState(true)
         try {
             const formData = new FormData();
             formData.append('image', {
@@ -79,22 +80,27 @@ function HomePage() {
                 }
             });
             console.log(response.data);
+            if (response.data) {
+                setState(false)
+            }
         } catch (error) {
             console.error('Error uploading image:', error);
+            setState(false)
         }
     };
 
 
     const getResults = async () => {
-        setState(false)
+        setState(true)
         try {
             const response = await axios.post('http://10.0.3.61:5000/save');
             console.log(response.data);
             if (response.data) {
-                setState(true)
+                setState(false)
             }
         } catch (error) {
             console.error('Error storing predictions:', error);
+            setState(false)
         }
     }
 
@@ -141,7 +147,7 @@ function HomePage() {
                     </View>
                     <TouchableOpacity
                         onPress={getResults}
-                        style={[styles.resultsButton, disabled && styles.disabledButton]}
+                        style={[styles.resultsButton, state && styles.disabledButton]}
                         disabled={state}
                     >
                         <Text style={{ color: 'white', fontSize: 20 }}>Get Results</Text>

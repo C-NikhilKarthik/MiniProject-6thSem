@@ -1,3 +1,5 @@
 env
 __pycache__
-models-pkl
+models-pkl/
+
+mailpass.py
