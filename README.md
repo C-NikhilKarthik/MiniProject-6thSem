@@ -36,17 +36,29 @@ The diagram showcases the following key components and their interactions:
 
 ## Images
 
-<a href="https://drive.google.com/file/d/1B7YETwAIyyKojhXaIdJdYzTpe07P-X_j/view?usp=sharing">
-  <img src="https://drive.google.com/uc?id=1B7YETwAIyyKojhXaIdJdYzTpe07P-X_j" alt="Landing Page" height="600"
-</a>
+<div style="text-align: center;">
+  <div style="display: inline-block; margin-right: 20px;">
+    <a href="https://drive.google.com/file/d/1B7YETwAIyyKojhXaIdJdYzTpe07P-X_j/view?usp=sharing">
+      <img src="https://drive.google.com/uc?id=1B7YETwAIyyKojhXaIdJdYzTpe07P-X_j" alt="Landing Page" height="600">
+      <p>Landing Page</p>
+    </a>
+  </div>
 
-<a href="https://drive.google.com/file/d/1yCZlkKx6-C2C6UdtTxdnZH8Ae1_on3St/view?usp=sharing">
-  <img src="https://drive.google.com/uc?id=1yCZlkKx6-C2C6UdtTxdnZH8Ae1_on3St" alt="Login Page" height="600"
-</a>
-   
-<a href="https://drive.google.com/file/d/1LLfLKx9DehtzyC2nRNfsR4hxtJL64Jft/view?usp=sharing">
-  <img src="https://drive.google.com/uc?id=1LLfLKx9DehtzyC2nRNfsR4hxtJL64Jft" alt="Home Page" height="600"
-</a>
+  <div style="display: inline-block; margin-right: 20px;">
+    <a href="https://drive.google.com/file/d/1yCZlkKx6-C2C6UdtTxdnZH8Ae1_on3St/view?usp=sharing">
+      <img src="https://drive.google.com/uc?id=1yCZlkKx6-C2C6UdtTxdnZH8Ae1_on3St" alt="Login Page" height="600">
+      <p>Login Page</p>
+    </a>
+  </div>
+
+  <div style="display: inline-block;">
+    <a href="https://drive.google.com/file/d/1LLfLKx9DehtzyC2nRNfsR4hxtJL64Jft/view?usp=sharing">
+      <img src="https://drive.google.com/uc?id=1LLfLKx9DehtzyC2nRNfsR4hxtJL64Jft" alt="Home Page" height="600">
+      <p>Home Page</p>
+    </a>
+  </div>
+</div>
+
 
 ## Challenges
 
