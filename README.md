@@ -142,7 +142,7 @@ Following are the steps to install and run the app locally on your PC using Expo
    - This will install all the necessary dependencies for the Flask server.
 
 7. **Download Pre-Trained Models (Optional):**
-   - If the app utilizes pre-trained machine learning models, you'll need to download them from the provided Google Drive link.
+   - If the app utilizes pre-trained machine learning models, you'll need to download them from the provided [Google Drive link](https://drive.google.com/drive/folders/1nbP6Y8DqcOkoozBI-IvBRZ_tQb5ROHk1?usp=drive_link).
    - Once downloaded, create a folder named `models-pkl` inside the `server` directory of the cloned repository.
    - Place the downloaded model files into the `models-pkl` folder.
 
